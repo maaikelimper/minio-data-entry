@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>MinIO Data Submission</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+
+      h1 {
+        text-align: center;
+      }
+
+      .form-container {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        max-width: 400px;
+        margin: 0 auto;
+      }
+
+      .form-container label {
+        font-weight: bold;
+      }
+
+      .form-container .input-group,
+      .form-container .textarea-group {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+      }
+
+      .form-container input,
+      .form-container select,
+      .form-container textarea {
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 14px;
+        box-sizing: border-box;
+        width: 100%;
+      }
+
+      .form-container .textarea-group textarea {
+        height: 100px;
+        resize: none;
+      }
+
+      .form-container .textarea-group textarea[data-initial] {
+        height: 400px;
+      }
+
+      .form-container .submit-button {
+        background-color: #007bff;
+        color: #fff;
+        font-size: 16px;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      }
+    </style>
+    <script>
+      function validateForm() {
+        var yearInput = document.getElementById('year');
+        var monthInput = document.getElementById('month');
+
+        var year = parseInt(yearInput.value);
+        var month = parseInt(monthInput.value);
+
+        if (isNaN(year) || isNaN(month)) {
+          alert('Please enter valid numeric values for year and month.');
+          return false;
+        }
+
+        if (year < 1900 || year > 2100 || month < 1 || month > 12) {
+          alert('Please enter valid values for year (1900-2100) and month (1-12).');
+          return false;
+        }
+
+        return true;
+      }
+
+      function submitForm() {
+        if (!validateForm()) {
+          return;
+        }
+        
+        var form = document.getElementById('submit-form');
+        var data = new FormData(form);
+
+        fetch('/submit', {
+          method: 'POST',
+          body: data
+        })
+          .then(response => response.json())
+          .then(result => {
+            var resultContainer = document.getElementById('result-container');
+            resultContainer.textContent = 'Status: ' + result.status + ', Message: ' + result.message;
+          })
+          .catch(error => {
+            console.error('Error:', error);
+          });
+      }
+
+      function loadFile(event) {
+        var file = event.target.files[0];
+        var reader = new FileReader();
+        reader.onload = function(e) {
+          var textarea = document.getElementById('data');
+          textarea.value = e.target.result;
+        };
+        reader.readAsText(file);
+      }
+    </script>
+  </head>
+  <body>
+    <h1>MinIO Data Submission</h1>
+    <div class="form-container">
+      <form id="submit-form" onsubmit="event.preventDefault(); submitForm()">
+        <div class="input-group">
+          <label for="username">Username:</label>
+          <input type="text" name="username" id="username" required>
+        </div>
+        <div class="input-group">
+          <label for="password">Password:</label>
+          <input type="password" name="password" id="password" required>
+        </div>
+        <div class="input-group">
+          <label for="year">Year:</label>
+          <input type="text" name="year" id="year" required>
+        </div>
+        <div class="input-group">
+          <label for="month">Month:</label>
+          <select name="month" id="month" required>
+            <option value="" disabled selected>Select month</option>
+            <script>
+              for (var i = 1; i <= 12; i++) {
+                var monthValue = i < 10 ? '0' + i : i;
+                document.write('<option value="' + monthValue + '">' + monthValue + '</option>');
+              }
+            </script>
+          </select>
+        </div>
+        <div class="textarea-group">
+          <label for="data">Data:</label>
+          <textarea name="data" id="data" required></textarea>
+        </div>
+        <div class="button-group">
+          <label for="file">Select File:</label>
+          <input type="file" id="file" accept=".txt" onchange="loadFile(event)">
+        </div>
+        <div class="button-group">
+          <input class="submit-button" type="submit" value="Submit">
+        </div>
+      </form>
+    </div>
+    <br>
+    <br>
+    <div id="result-container"></div>
+  </body>
+</html>

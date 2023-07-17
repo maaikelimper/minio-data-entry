@@ -1,0 +1,10 @@
+services:
+  minio-data-entry:
+    container_name: minio-data-entry
+    build: .
+    #image: mlimper/minio-data-entry
+    restart: always
+    env_file:
+      - dev.env
+    ports:
+      - "5000:5000"
